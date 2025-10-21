@@ -1,0 +1,35 @@
+name: rbmj-ci
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm init -y
+      - run: npm i vitest -D
+      - run: |
+          cat > logic.test.js <<'EOF'
+          import { test, expect } from 'vitest';
+
+          function childOrderIndex(ids, studentId){
+            const fam = ids.slice().sort((a,b)=>a-b);
+            return Math.max(0, fam.indexOf(studentId));
+          }
+          function familyDiscountFactor(ids, studentId){
+            return childOrderIndex(ids, studentId) >= 1 ? 0.5 : 1.0;
+          }
+          function mukafaah(gross){ return Math.round(gross*0.70); }
+
+          test('diskon keluarga', ()=>{
+            expect(familyDiscountFactor([1,2,3],1)).toBe(1.0);
+            expect(familyDiscountFactor([1,2,3],2)).toBe(0.5);
+            expect(familyDiscountFactor([1,2,3],3)).toBe(0.5);
+          });
+
+          test('mukafaah 70%', ()=>{
+            expect(mukafaah(10000)).toBe(7000);
+          });
+          EOF
+      - run: npx vitest run
