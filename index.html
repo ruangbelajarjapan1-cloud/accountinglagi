@@ -1,97 +1,110 @@
 <!doctype html>
 <html lang="id">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>RBMJ Jepang — Manajemen</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-  .tab.active{ background:#111827; color:white; box-shadow:0 1px 2px rgba(0,0,0,.08); }
-</style>
 
+  <!-- Tailwind CDN (cukup untuk prototipe) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    .tab.active{ background:#111827; color:#fff; box-shadow:0 1px 2px rgba(0,0,0,.08); }
+    .card{ background:#fff; border-radius:16px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  </style>
+
+  <script src="./app.js" defer></script>
 </head>
 <body class="bg-slate-50 text-slate-900">
-  <div class="max-w-6xl mx-auto p-4">
-    <header class="flex items-center justify-between py-3">
+  <div class="max-w-7xl mx-auto p-6">
+    <header class="flex items-center justify-between mb-4">
       <h1 class="text-2xl font-bold">RBMJ Jepang</h1>
-      <nav class="flex gap-2">
-        <button class="tab px-3 py-1 rounded-xl bg-white shadow" data-tab="dashboard">Dashboard</button>
+      <nav class="flex gap-2 text-sm">
+        <button class="tab px-3 py-1 rounded-xl" data-tab="dashboard">Dashboard</button>
         <button class="tab px-3 py-1 rounded-xl" data-tab="siswa">Siswa</button>
         <button class="tab px-3 py-1 rounded-xl" data-tab="pembayaran">Pembayaran</button>
         <button class="tab px-3 py-1 rounded-xl" data-tab="invoice">Invoice</button>
         <button class="tab px-3 py-1 rounded-xl" data-tab="mukafaah">Mukafaah</button>
         <button class="tab px-3 py-1 rounded-xl" data-tab="kas">Buku Kas</button>
         <button class="tab px-3 py-1 rounded-xl" data-tab="penagihan">Penagihan</button>
-
       </nav>
     </header>
 
     <!-- DASHBOARD -->
-    <section id="dashboard" class="card p-4 bg-white rounded-2xl shadow">
-      <div class="flex flex-wrap gap-4">
-        <div class="grow">
-          <label class="text-sm">Bulan</label>
-          <input id="bulan" type="month" class="border rounded p-2" />
-          <button id="btnRefresh" class="ml-2 px-3 py-2 rounded bg-slate-900 text-white">Refresh</button>
-        </div>
+    <section id="dashboard" class="card p-4">
+      <div class="flex items-center gap-2 mb-3">
+        <label class="text-sm">Bulan</label>
+        <input id="bulan" type="month" class="border rounded p-2" />
+        <button id="btnRefresh" class="px-3 py-2 rounded bg-slate-900 text-white">Refresh</button>
       </div>
-      <div class="grid md:grid-cols-3 gap-4 mt-4" id="stats"></div>
-      <div class="mt-6">
-        <h3 class="font-semibold mb-2">Daftar Siswa Belum Lunas</h3>
-        <div id="unpaid" class="overflow-auto text-sm"></div>
-      </div>
+
+      <div id="stats" class="grid sm:grid-cols-2 md:grid-cols-3 gap-3 mb-4"></div>
+
+      <h3 class="font-semibold mb-2">Daftar Siswa Belum Lunas</h3>
+      <div id="unpaid" class="overflow-auto text-sm"></div>
     </section>
 
     <!-- SISWA -->
-    <section id="siswa" class="hidden card p-4 bg-white rounded-2xl shadow">
-      <h3 class="font-semibold mb-3">Daftar Siswa</h3>
+    <section id="siswa" class="hidden card p-4">
+      <h3 class="font-semibold mb-3">Data Siswa</h3>
       <div id="tblSiswa" class="text-sm overflow-auto"></div>
     </section>
 
     <!-- PEMBAYARAN -->
-    <section id="pembayaran" class="hidden card p-4 bg-white rounded-2xl shadow">
+    <section id="pembayaran" class="hidden card p-4">
       <h3 class="font-semibold mb-3">Input Pembayaran</h3>
-      <form id="payForm" class="grid md:grid-cols-5 gap-3 text-sm">
-        <select id="payStudent" class="border rounded p-2" required></select>
-        <select id="payClass" class="border rounded p-2" required></select>
-        <input id="payMonth" type="month" class="border rounded p-2" required/>
-        <input id="payAmount" type="number" class="border rounded p-2" placeholder="Jumlah (JPY)" required/>
-        <button class="px-3 py-2 rounded bg-emerald-600 text-white">Simpan & Kwitansi</button>
+      <form id="payForm" class="grid sm:grid-cols-2 gap-3 max-w-xl">
+        <label class="text-sm">
+          <div class="mb-1">Siswa</div>
+          <select id="payStudent" class="border rounded p-2 w-full"></select>
+        </label>
+        <label class="text-sm">
+          <div class="mb-1">Kelas</div>
+          <select id="payClass" class="border rounded p-2 w-full"></select>
+        </label>
+        <label class="text-sm">
+          <div class="mb-1">Bulan</div>
+          <input id="payMonth" type="month" class="border rounded p-2 w-full" />
+        </label>
+        <label class="text-sm">
+          <div class="mb-1">Jumlah (JPY)</div>
+          <input id="payAmount" type="number" class="border rounded p-2 w-full" />
+        </label>
+        <div class="col-span-full flex gap-2">
+          <button class="px-3 py-2 rounded bg-emerald-600 text-white" type="submit">Simpan & Buat Kwitansi</button>
+          <div id="payResult" class="text-sm text-slate-600 flex items-center"></div>
+        </div>
       </form>
-      <div id="payResult" class="mt-3 text-sm"></div>
     </section>
 
     <!-- INVOICE -->
-    <section id="invoice" class="hidden card p-4 bg-white rounded-2xl shadow">
-      <h3 class="font-semibold mb-3">Invoice Bulanan</h3>
+    <section id="invoice" class="hidden card p-4">
+      <h3 class="font-semibold mb-3">Invoice</h3>
       <div id="tblInvoice" class="text-sm overflow-auto"></div>
     </section>
 
     <!-- MUKAFAAH -->
-    <section id="mukafaah" class="hidden card p-4 bg-white rounded-2xl shadow">
-      <h3 class="font-semibold mb-3">Mukafaah Guru (70%)</h3>
+    <section id="mukafaah" class="hidden card p-4">
+      <h3 class="font-semibold mb-3">Mukafaah Guru</h3>
       <div id="tblMuk" class="text-sm overflow-auto"></div>
     </section>
 
     <!-- KAS -->
-    <section id="kas" class="hidden card p-4 bg-white rounded-2xl shadow">
-      <h3 class="font-semibold mb-3">Buku Kas Bulanan</h3>
-      <div id="boxKas" class="text-sm"></div>
+    <section id="kas" class="hidden card p-4">
+      <h3 class="font-semibold mb-3">Ringkasan Kas</h3>
+      <div id="boxKas"></div>
     </section>
+
     <!-- PENAGIHAN -->
-<section id="penagihan" class="hidden card p-4 bg-white rounded-2xl shadow">
-  <div class="flex items-center gap-2 mb-3">
-    <h3 class="font-semibold">Penagihan (Belum Bayar)</h3>
-    <input id="billMonth" type="month" class="border rounded p-2" />
-    <button id="btnLoadBilling" class="px-3 py-2 rounded bg-slate-900 text-white">Muat</button>
-    <button id="btnBulk" class="px-3 py-2 rounded bg-emerald-600 text-white">Cetak Massal</button>
+    <section id="penagihan" class="hidden card p-4">
+      <div class="flex items-center gap-2 mb-3">
+        <h3 class="font-semibold">Penagihan (Belum Bayar)</h3>
+        <input id="billMonth" type="month" class="border rounded p-2" />
+        <button id="btnLoadBilling" class="px-3 py-2 rounded bg-slate-900 text-white">Muat</button>
+        <button id="btnBulk" class="px-3 py-2 rounded bg-emerald-600 text-white">Cetak Massal</button>
+      </div>
+      <div id="tblBill" class="text-sm overflow-auto"></div>
+    </section>
   </div>
-  <div id="tblBill" class="text-sm overflow-auto"></div>
-</section>
-
-  </div>
-
-  <script src="./app.js" defer></script>
-
 </body>
 </html>
