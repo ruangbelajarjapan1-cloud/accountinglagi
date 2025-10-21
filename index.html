@@ -17,6 +17,8 @@
         <button class="tab px-3 py-1 rounded-xl" data-tab="invoice">Invoice</button>
         <button class="tab px-3 py-1 rounded-xl" data-tab="mukafaah">Mukafaah</button>
         <button class="tab px-3 py-1 rounded-xl" data-tab="kas">Buku Kas</button>
+        <button class="tab px-3 py-1 rounded-xl" data-tab="penagihan">Penagihan</button>
+
       </nav>
     </header>
 
@@ -72,6 +74,17 @@
       <h3 class="font-semibold mb-3">Buku Kas Bulanan</h3>
       <div id="boxKas" class="text-sm"></div>
     </section>
+    <!-- PENAGIHAN -->
+<section id="penagihan" class="hidden card p-4 bg-white rounded-2xl shadow">
+  <div class="flex items-center gap-2 mb-3">
+    <h3 class="font-semibold">Penagihan (Belum Bayar)</h3>
+    <input id="billMonth" type="month" class="border rounded p-2" />
+    <button id="btnLoadBilling" class="px-3 py-2 rounded bg-slate-900 text-white">Muat</button>
+    <button id="btnBulk" class="px-3 py-2 rounded bg-emerald-600 text-white">Cetak Massal</button>
+  </div>
+  <div id="tblBill" class="text-sm overflow-auto"></div>
+</section>
+
   </div>
 
   <script src="./app.js"></script>
