@@ -3,6 +3,29 @@ const API_BASE = 'https://script.google.com/macros/s/AKfycbwLwGA4QErZIBPzPSJ7-lQ
 
 const $ = s => document.querySelector(s);
 const byId = id => document.getElementById(id);
+// --- TAB CONTROLLER (robust) ---
+document.addEventListener('DOMContentLoaded', () => {
+  const sections = Array.from(document.querySelectorAll('section'));
+  const tabs = Array.from(document.querySelectorAll('.tab'));
+
+  function showTab(name){
+    sections.forEach(s => s.classList.add('hidden'));
+    const el = document.getElementById(name);
+    if (el) el.classList.remove('hidden');
+
+    tabs.forEach(t => t.classList.remove('active'));
+    const active = tabs.find(t => t.dataset.tab === name);
+    if (active) active.classList.add('active');
+  }
+
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => showTab(btn.dataset.tab));
+  });
+
+  // set tab default saat awal (fallback bila belum ada kelas aktif)
+  const first = tabs[0]?.dataset.tab || 'dashboard';
+  showTab(first);
+});
 
 function fmtJPY(n){ return new Intl.NumberFormat('ja-JP',{style:'currency',currency:'JPY'}).format(Number(n||0)); }
 
@@ -28,12 +51,23 @@ document.querySelectorAll('.tab').forEach(btn=>{
 
 // === Init ===
 (async function init(){
-  byId('bulan').value = new Date().toISOString().slice(0,7);
-  await loadDashboard();
-  await loadStudents();
-  await loadClasses();
-  wirePayments();
+  const monthNow = new Date().toISOString().slice(0,7);
+  const bulan = document.getElementById('bulan');
+  if (bulan) bulan.value = monthNow;
+  const billMonth = document.getElementById('billMonth');
+  if (billMonth) billMonth.value = monthNow;
+
+  try {
+    await loadDashboard();
+    await loadStudents();
+    await loadClasses();
+    wirePayments?.();
+    await loadBilling?.();
+  } catch (e) {
+    console.error('Init error:', e);
+  }
 })();
+
 byId('billMonth').value = new Date().toISOString().slice(0,7);
 await loadBilling();
 
