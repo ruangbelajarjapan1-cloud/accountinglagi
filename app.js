@@ -34,6 +34,8 @@ document.querySelectorAll('.tab').forEach(btn=>{
   await loadClasses();
   wirePayments();
 })();
+byId('billMonth').value = new Date().toISOString().slice(0,7);
+await loadBilling();
 
 $('#btnRefresh').addEventListener('click', loadDashboard);
 
@@ -161,6 +163,48 @@ function wirePayments(){
     }
   });
 }
+async function loadBilling(){
+  const month = byId('billMonth').value || new Date().toISOString().slice(0,7);
+  const unpaid = await apiGet('unpaidStudents', { month });
+  byId('tblBill').innerHTML = `
+    <table class="min-w-full border">
+      <tr class="bg-slate-100">
+        <th class="p-2 text-left">Invoice ID</th>
+        <th class="p-2">Siswa</th>
+        <th class="p-2">Bulan</th>
+        <th class="p-2">Due</th>
+        <th class="p-2">Paid</th>
+        <th class="p-2">Status</th>
+        <th class="p-2">Aksi</th>
+      </tr>
+      ${unpaid.map(u=>`
+        <tr class="border-t">
+          <td class="p-2">${u.id}</td>
+          <td class="p-2">${u.student_id}</td>
+          <td class="p-2">${u.month}</td>
+          <td class="p-2 text-right">${fmtJPY(u.total_due_jpy)}</td>
+          <td class="p-2 text-right">${fmtJPY(u.total_paid_jpy)}</td>
+          <td class="p-2">${u.status}</td>
+          <td class="p-2">
+            <button class="px-2 py-1 rounded bg-slate-900 text-white" onclick="genInvoice('${u.id}')">Cetak</button>
+          </td>
+        </tr>`).join('')}
+    </table>
+  `;
+}
+byId('billMonth').value = new Date().toISOString().slice(0,7);
+byId('btnLoadBilling').addEventListener('click', loadBilling);
+
+byId('btnBulk').addEventListener('click', async ()=>{
+  const month = byId('billMonth').value || new Date().toISOString().slice(0,7);
+  const res = await fetch(API_BASE, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ action:'genInvoicePdfBulk', month })
+  }).then(r=>r.json());
+  alert(res?.ok ? `Berhasil membuat ${res.generated} PDF.` : 'Gagal cetak massal.');
+  await loadBilling();
+});
 
 async function genInvoice(invoice_id){
   const gen = await fetch(API_BASE, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'genInvoicePdf', invoice_id}) }).then(r=>r.json());
