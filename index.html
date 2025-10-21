@@ -1,219 +1,79 @@
 <!doctype html>
 <html lang="id">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>RBMJ — Dokumen & Kwitansi</title>
-<style>
-  :root{--bg:#0f172a;--card:#fff;--muted:#64748b;--line:#e5e7eb;}
-  *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:#f1f5f9;color:#0f172a}
-  .wrap{max-width:960px;margin:24px auto;padding:0 16px}
-  .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-  .brand{font-weight:700;font-size:18px}
-  .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 6px 20px rgba(15,23,42,.06)}
-  .card h3{margin:0 0 8px}
-  .row{display:grid;gap:8px;margin:10px 0}
-  label{font-size:12px;color:var(--muted)}
-  input,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;outline:none}
-  .muted{color:var(--muted);font-size:12px}
-  .btn{appearance:none;border:0;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;background:#0ea5e9;color:#fff}
-  .btn:disabled{opacity:.6;cursor:not-allowed}
-  .result{margin-top:10px;padding:10px;border:1px dashed var(--line);border-radius:12px;background:#fafafa;font-size:14px}
-  .link{display:inline-block;margin-right:10px}
-  .small{font-size:12px}
-  .footer{margin-top:24px;text-align:center;color:#94a3b8;font-size:12px}
-  code{background:#f8fafc;border:1px solid var(--line);padding:2px 6px;border-radius:6px}
-</style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>RBMJ Jepang — Manajemen</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-<div class="wrap">
-  <div class="head">
-    <div class="brand">RBMJ — Generator Dokumen</div>
-    <div class="muted">JSONP client • no CORS drama</div>
-  </div>
+<body class="bg-slate-50 text-slate-900">
+  <div class="max-w-6xl mx-auto p-4">
+    <header class="flex items-center justify-between py-3">
+      <h1 class="text-2xl font-bold">RBMJ Jepang</h1>
+      <nav class="flex gap-2">
+        <button class="tab px-3 py-1 rounded-xl bg-white shadow" data-tab="dashboard">Dashboard</button>
+        <button class="tab px-3 py-1 rounded-xl" data-tab="siswa">Siswa</button>
+        <button class="tab px-3 py-1 rounded-xl" data-tab="pembayaran">Pembayaran</button>
+        <button class="tab px-3 py-1 rounded-xl" data-tab="invoice">Invoice</button>
+        <button class="tab px-3 py-1 rounded-xl" data-tab="mukafaah">Mukafaah</button>
+        <button class="tab px-3 py-1 rounded-xl" data-tab="kas">Buku Kas</button>
+      </nav>
+    </header>
 
-  <div class="grid">
-    <!-- KWITANSI SINGLE -->
-    <div class="card" id="card-single">
-      <h3>Kwitansi (Single Transaksi)</h3>
-      <div class="row">
-        <label>pembayaran_id</label>
-        <input id="k_pembayaran" placeholder="contoh: 123"/>
+    <!-- DASHBOARD -->
+    <section id="dashboard" class="card p-4 bg-white rounded-2xl shadow">
+      <div class="flex flex-wrap gap-4">
+        <div class="grow">
+          <label class="text-sm">Bulan</label>
+          <input id="bulan" type="month" class="border rounded p-2" />
+          <button id="btnRefresh" class="ml-2 px-3 py-2 rounded bg-slate-900 text-white">Refresh</button>
+        </div>
       </div>
-      <div class="row">
-        <label>WA Number (opsional)</label>
-        <input id="k_wa" placeholder="+81... atau kosongkan"/>
+      <div class="grid md:grid-cols-3 gap-4 mt-4" id="stats"></div>
+      <div class="mt-6">
+        <h3 class="font-semibold mb-2">Daftar Siswa Belum Lunas</h3>
+        <div id="unpaid" class="overflow-auto text-sm"></div>
       </div>
-      <button class="btn" id="btn-kwitansi">Buat & Simpan PDF</button>
-      <div class="result" id="res-kwitansi" hidden></div>
-    </div>
+    </section>
 
-    <!-- KWITANSI MKMB -->
-    <div class="card" id="card-mkmb">
-      <h3>Kwitansi MKMB (Multi Kelas / Multi Bulan)</h3>
-      <div class="row">
-        <label>siswa_id</label>
-        <input id="m_siswa" placeholder="contoh: 45"/>
-      </div>
-      <div class="row">
-        <label>kelas_ids (pisah koma)</label>
-        <input id="m_kelas" placeholder="contoh: 10,12"/>
-      </div>
-      <div class="row">
-        <label>periodes YYYY-MM (pisah koma)</label>
-        <input id="m_periodes" placeholder="contoh: 2025-01,2025-02"/>
-      </div>
-      <button class="btn" id="btn-mkmb">Buat & Simpan PDF</button>
-      <div class="result" id="res-mkmb" hidden></div>
-    </div>
+    <!-- SISWA -->
+    <section id="siswa" class="hidden card p-4 bg-white rounded-2xl shadow">
+      <h3 class="font-semibold mb-3">Daftar Siswa</h3>
+      <div id="tblSiswa" class="text-sm overflow-auto"></div>
+    </section>
 
-    <!-- RINCIAN TAHUNAN -->
-    <div class="card" id="card-rincian">
-      <h3>Rincian SPP Tahunan</h3>
-      <div class="row">
-        <label>siswa_id</label>
-        <input id="r_siswa" placeholder="contoh: 45"/>
-      </div>
-      <div class="row">
-        <label>tahun</label>
-        <input id="r_tahun" placeholder="contoh: 2025"/>
-      </div>
-      <button class="btn" id="btn-rincian">Buat & Simpan PDF</button>
-      <div class="result" id="res-rincian" hidden></div>
-    </div>
+    <!-- PEMBAYARAN -->
+    <section id="pembayaran" class="hidden card p-4 bg-white rounded-2xl shadow">
+      <h3 class="font-semibold mb-3">Input Pembayaran</h3>
+      <form id="payForm" class="grid md:grid-cols-5 gap-3 text-sm">
+        <select id="payStudent" class="border rounded p-2" required></select>
+        <select id="payClass" class="border rounded p-2" required></select>
+        <input id="payMonth" type="month" class="border rounded p-2" required/>
+        <input id="payAmount" type="number" class="border rounded p-2" placeholder="Jumlah (JPY)" required/>
+        <button class="px-3 py-2 rounded bg-emerald-600 text-white">Simpan & Kwitansi</button>
+      </form>
+      <div id="payResult" class="mt-3 text-sm"></div>
+    </section>
 
     <!-- INVOICE -->
-    <div class="card" id="card-invoice">
-      <h3>Invoice SPP</h3>
-      <div class="row">
-        <label>siswa_id</label>
-        <input id="i_siswa" placeholder="contoh: 45"/>
-      </div>
-      <div class="row">
-        <label>kelas_id</label>
-        <input id="i_kelas" placeholder="contoh: 10"/>
-      </div>
-      <div class="row">
-        <label>bulan (YYYY-MM)</label>
-        <input id="i_bulan" placeholder="contoh: 2025-10"/>
-      </div>
-      <div class="row">
-        <label>jatuh_tempo (opsional)</label>
-        <input id="i_jt" placeholder="contoh: 2025-10-31"/>
-      </div>
-      <button class="btn" id="btn-invoice">Buat & Simpan PDF</button>
-      <div class="result" id="res-invoice" hidden></div>
-    </div>
+    <section id="invoice" class="hidden card p-4 bg-white rounded-2xl shadow">
+      <h3 class="font-semibold mb-3">Invoice Bulanan</h3>
+      <div id="tblInvoice" class="text-sm overflow-auto"></div>
+    </section>
+
+    <!-- MUKAFAAH -->
+    <section id="mukafaah" class="hidden card p-4 bg-white rounded-2xl shadow">
+      <h3 class="font-semibold mb-3">Mukafaah Guru (70%)</h3>
+      <div id="tblMuk" class="text-sm overflow-auto"></div>
+    </section>
+
+    <!-- KAS -->
+    <section id="kas" class="hidden card p-4 bg-white rounded-2xl shadow">
+      <h3 class="font-semibold mb-3">Buku Kas Bulanan</h3>
+      <div id="boxKas" class="text-sm"></div>
+    </section>
   </div>
 
-  <div class="footer">
-    WebApp URL harus diisi di variabel <code>WEB_APP_URL</code>.  
-    JSONP: kita kirim <code>?fn=...&args=...&callback=...</code>.
-  </div>
-</div>
-
-<script>
-/* ================== SET WEB APP URL ================== */
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyCID-H5ydMRsUcPihEwEr05WUPTCBEfpy6zKT3S2wvr_kA7K06TmQAwtRx5MAgqGdMBQ/exec'; // <= ganti
-
-/* =============== JSONP helper (Promise) =============== */
-function jsonpCall(fnName, args) {
-  return new Promise((resolve, reject) => {
-    const cb = 'cb_' + Math.random().toString(36).slice(2);
-    const script = document.createElement('script');
-    const payload = encodeURIComponent(JSON.stringify({ fn: fnName, args: args || {} }));
-    script.src = `${WEB_APP_URL}?callback=${cb}&args=${payload}`;
-    script.async = true;
-
-    let timeout = setTimeout(() => {
-      cleanup(); reject(new Error('Timeout JSONP'));
-    }, 20000);
-
-    function cleanup(){
-      clearTimeout(timeout);
-      delete window[cb];
-      if (script.parentNode) script.parentNode.removeChild(script);
-    }
-
-    window[cb] = (resp) => {
-      cleanup();
-      if (resp && resp.ok) resolve(resp.data);
-      else reject(new Error((resp && resp.error) || 'Unknown error'));
-    };
-
-    script.onerror = () => { cleanup(); reject(new Error('Script error')); };
-    document.head.appendChild(script);
-  });
-}
-
-/* =============== UX helpers =============== */
-function showResult(el, html){
-  el.hidden = false; el.innerHTML = html;
-}
-function linkify(label, url){
-  return `<a class="link" target="_blank" rel="noopener" href="${url}">${label}</a>`;
-}
-
-/* =============== Bind actions =============== */
-// Kwitansi Single
-document.getElementById('btn-kwitansi').onclick = async () => {
-  const pembayaran_id = document.getElementById('k_pembayaran').value.trim();
-  const wa_number = document.getElementById('k_wa').value.trim();
-  const resEl = document.getElementById('res-kwitansi');
-  resEl.hidden = true;
-  try{
-    const data = await jsonpCall('apiGenerateKwitansi', { pembayaran_id, wa_number });
-    showResult(resEl, `✅ Sukses: ${linkify('Buka PDF', data.url)} ${data.wa ? linkify('Kirim WA', data.wa) : ''}`);
-  }catch(err){
-    showResult(resEl, `❌ Gagal: <span class="small">${err.message}</span>`);
-  }
-};
-
-// Kwitansi MKMB
-document.getElementById('btn-mkmb').onclick = async () => {
-  const siswa_id = document.getElementById('m_siswa').value.trim();
-  const kelas_ids = document.getElementById('m_kelas').value.split(',').map(s=>s.trim()).filter(Boolean);
-  const periodes = document.getElementById('m_periodes').value.split(',').map(s=>s.trim()).filter(Boolean);
-  const resEl = document.getElementById('res-mkmb');
-  resEl.hidden = true;
-  try{
-    const data = await jsonpCall('apiGenerateKwitansiMKMB', { siswa_id, kelas_ids, periodes });
-    showResult(resEl, `✅ Sukses (Total: ${new Intl.NumberFormat('ja-JP',{style:'currency',currency:'JPY'}).format(data.total)}): ${linkify('Buka PDF', data.url)} ${data.wa ? linkify('Kirim WA', data.wa) : ''}`);
-  }catch(err){
-    showResult(resEl, `❌ Gagal: <span class="small">${err.message}</span>`);
-  }
-};
-
-// Rincian Tahunan
-document.getElementById('btn-rincian').onclick = async () => {
-  const siswa_id = document.getElementById('r_siswa').value.trim();
-  const tahun    = document.getElementById('r_tahun').value.trim();
-  const resEl = document.getElementById('res-rincian');
-  resEl.hidden = true;
-  try{
-    const data = await jsonpCall('apiGenerateRincianTahunanPdf', { siswa_id, tahun });
-    showResult(resEl, `✅ Sukses: ${linkify('Buka PDF', data.url)} ${data.wa ? linkify('Kirim WA', data.wa) : ''}`);
-  }catch(err){
-    showResult(resEl, `❌ Gagal: <span class="small">${err.message}</span>`);
-  }
-};
-
-// Invoice
-document.getElementById('btn-invoice').onclick = async () => {
-  const siswa_id = document.getElementById('i_siswa').value.trim();
-  const kelas_id = document.getElementById('i_kelas').value.trim();
-  const bulan    = document.getElementById('i_bulan').value.trim();
-  const jatuh_tempo = document.getElementById('i_jt').value.trim();
-  const resEl = document.getElementById('res-invoice');
-  resEl.hidden = true;
-  try{
-    const data = await jsonpCall('apiGenerateInvoice', { siswa_id, kelas_id, bulan, jatuh_tempo });
-    showResult(resEl, `✅ Sukses (No: ${data.no}): ${linkify('Buka PDF', data.url)} ${data.wa ? linkify('Kirim WA', data.wa) : ''}`);
-  }catch(err){
-    showResult(resEl, `❌ Gagal: <span class="small">${err.message}</span>`);
-  }
-};
-</script>
+  <script src="./app.js"></script>
 </body>
 </html>
