@@ -1,5 +1,5 @@
 // === SETUP API ===
-const API_BASE = '<<PASTE_WEB_APP_URL_GAS_DI_SINI>>'; // contoh: https://script.google.com/macros/s/AKfycbx.../exec
+const API_BASE = 'https://script.google.com/macros/s/AKfycbwLwGA4QErZIBPzPSJ7-lQcxKqrlzz1XIUUyOl0u9ERLvG49LW8zW4DUpGcNH0iKbG7Qg/exec'; // contoh: https://script.google.com/macros/s/AKfycbx.../exec
 
 const $ = s => document.querySelector(s);
 const byId = id => document.getElementById(id);
