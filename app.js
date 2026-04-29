@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Event Listeners untuk semua tombol
     document.getElementById('btnHelp').addEventListener('click', () => toggleHelp(true));
     document.getElementById('btnCloseHelp').addEventListener('click', () => toggleHelp(false));
     document.getElementById('btnSave').addEventListener('click', saveData);
@@ -8,48 +7,31 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnSendWA').addEventListener('click', sendWA);
     document.getElementById('search').addEventListener('keyup', filterList);
 
-    // Muat data saat pertama kali dibuka
     loadData();
 });
 
-// Fungsi untuk mengekstrak Nama dan Nomor HP 
-function parseContact(line) {
-    line = line.trim();
-    if (!line) return null;
-
-    // Cari pola angka untuk nomor HP
-    const phoneRegex = /(?:\+62|62|0)[0-9\- ]{7,15}/g;
-    const phoneMatch = line.match(phoneRegex);
-    let phone = phoneMatch ? phoneMatch[0].replace(/[^0-9\+]/g, '') : '';
-    
-    // Hapus nomor dari baris untuk mendapatkan nama saja
-    let name = line.replace(phoneRegex, '').replace(/[-()]/g, '').trim();
-    
-    // Jika tidak ada huruf sama sekali, gunakan teks asli
-    if (!name) name = line;
-
-    // Bersihkan nama dari spasi berlebih agar tag menempel
-    name = name.replace(/\s+/g, ''); 
-
-    return { name, phone, original: line };
+// Fungsi pembersih yang disederhanakan: HANYA menghapus spasi berlebih di awal/akhir baris
+// Tidak lagi menghapus angka atau membuang spasi di tengah nama
+function cleanName(txt) {
+    return txt.trim();
 }
 
 function saveData() {
     const raw = document.getElementById('rawInput').value;
-    const lines = raw.split('\n');
-    const contacts = lines.map(parseContact).filter(c => c !== null);
+    // Pisahkan berdasarkan baris, bersihkan, dan buang baris yang kosong
+    const names = raw.split('\n').map(cleanName).filter(n => n !== "");
     
-    localStorage.setItem('wa_db_wahyu', JSON.stringify(contacts));
-    render(contacts);
-    alert("✅ Data berhasil disimpan & dioptimalkan!");
+    localStorage.setItem('wa_db_wahyu', JSON.stringify(names));
+    render(names);
+    alert("✅ Data berhasil disimpan!");
 }
 
 function loadData() {
     const saved = localStorage.getItem('wa_db_wahyu');
     if(saved) { 
-        const contacts = JSON.parse(saved);
-        render(contacts); 
-        document.getElementById('rawInput').value = contacts.map(c => c.original).join('\n'); 
+        const names = JSON.parse(saved);
+        render(names); 
+        document.getElementById('rawInput').value = names.join('\n'); 
     }
 }
 
@@ -61,15 +43,14 @@ function clearData() {
     }
 }
 
-function render(data) {
+function render(names) {
     const container = document.getElementById('nameList');
-    container.innerHTML = data.map((c) => `
+    container.innerHTML = names.map((name) => `
         <div class="list-item" onclick="toggleItem(this)">
             <div class="list-item-left">
-                <input type="checkbox" class="chk" data-name="${c.name}" data-phone="${c.phone}">
-                <span>${c.name || 'Tanpa Nama'}</span>
+                <input type="checkbox" class="chk" value="${name}">
+                <span>${name}</span>
             </div>
-            ${c.phone ? `<span class="contact-phone">${c.phone}</span>` : ''}
         </div>
     `).join('');
     updateCount();
@@ -108,20 +89,12 @@ function updateCount() {
 function formatText(checkboxes) {
     const useAt = document.getElementById('atTag').checked;
     const useNum = document.getElementById('numTag').checked;
-    const tagByPhone = document.getElementById('tagByPhone').checked;
     const pesan = document.getElementById('msgInput').value;
 
     const formatted = checkboxes.map((cb, i) => {
-        const name = cb.getAttribute('data-name');
-        let phone = cb.getAttribute('data-phone');
-        
-        if (phone && phone.startsWith('0')) {
-            phone = '62' + phone.substring(1);
-        }
-
-        let identifier = (tagByPhone && phone) ? phone : name;
-        let res = useAt ? "@" + identifier : identifier;
-        
+        const name = cb.value;
+        // Mempertahankan nama utuh (contoh: @ARN251-28214 SUNARSA)
+        let res = useAt ? "@" + name : name;
         return useNum ? (i+1) + ". " + res : res;
     });
 
@@ -132,7 +105,7 @@ function formatText(checkboxes) {
 function copyBatch(batchCbs) {
     const txt = formatText(batchCbs);
     navigator.clipboard.writeText(txt).then(() => {
-        alert("✅ Teks Disalin!\n\nBuka WA, Tempel (Paste). Lalu hapus 1 huruf terakhir dari nama orang tersebut, dan ketik ulang hurufnya agar tag biru muncul.");
+        alert("✅ Teks Disalin!\n\nBuka WA, Tempel (Paste). Lalu hapus 1 huruf terakhir dari nama, dan ketik ulang hurufnya.");
     });
 }
 
