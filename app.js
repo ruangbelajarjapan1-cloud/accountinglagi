@@ -1,214 +1,171 @@
-// ======== KONFIG =========
-const API_BASE = 'https://script.google.com/macros/s/AKfycbwLwGA4QErZIBPzPSJ7-lQcxKqrlzz1XIUUyOl0u9ERLvG49LW8zW4DUpGcNH0iKbG7Qg/exec'; // ganti dengan URL Web App GAS (akhiran /exec)
+document.addEventListener('DOMContentLoaded', () => {
+    // Event Listeners untuk semua tombol
+    document.getElementById('btnHelp').addEventListener('click', () => toggleHelp(true));
+    document.getElementById('btnCloseHelp').addEventListener('click', () => toggleHelp(false));
+    document.getElementById('btnSave').addEventListener('click', saveData);
+    document.getElementById('btnClear').addEventListener('click', clearData);
+    document.getElementById('btnToggleAll').addEventListener('click', toggleAll);
+    document.getElementById('btnSendWA').addEventListener('click', sendWA);
+    document.getElementById('search').addEventListener('keyup', filterList);
 
-// ======== JSONP HELPER (bypass CORS) =========
-function jsonp(action, params = {}) {
-  return new Promise((resolve, reject) => {
-    const cb = 'cb_' + Date.now() + '_' + Math.random().toString(16).slice(2);
-    window[cb] = (data) => { resolve(data); delete window[cb]; script.remove(); };
-    const qp = new URLSearchParams({ action, callback: cb, ...params });
-    const script = document.createElement('script');
-    script.src = `${API_BASE}?${qp.toString()}`;
-    script.onerror = (e) => { delete window[cb]; script.remove(); reject(e); };
-    document.body.appendChild(script);
-  });
-}
-
-const $ = (sel) => document.querySelector(sel);
-const byId = (id) => document.getElementById(id);
-const fmtJPY = (n) => new Intl.NumberFormat('ja-JP',{style:'currency',currency:'JPY'}).format(Number(n||0));
-
-// ========== APP LOGIC ==========
-async function loadDashboard(){
-  const month = byId('bulan')?.value || new Date().toISOString().slice(0,7);
-  const [unpaid, invoices, muk, kas] = await Promise.all([
-    jsonp('unpaidStudents', { month }),
-    jsonp('listInvoices', { month }),
-    jsonp('mukafaah', { month }),
-    jsonp('cashbook', { month })
-  ]);
-
-  $('#stats').innerHTML = `
-    <div class="p-4 rounded-2xl bg-white shadow">
-      <div class="text-sm text-slate-500">Invoice (Unpaid/Partial)</div>
-      <div class="text-2xl font-semibold">${unpaid.length}</div>
-    </div>
-    <div class="p-4 rounded-2xl bg-white shadow">
-      <div class="text-sm text-slate-500">Total Tagihan</div>
-      <div class="text-2xl font-semibold">${fmtJPY(invoices.reduce((s,i)=>s+Number(i.total_due_jpy||0),0))}</div>
-    </div>
-    <div class="p-4 rounded-2xl bg-white shadow">
-      <div class="text-sm text-slate-500">Kas (Net)</div>
-      <div class="text-2xl font-semibold">${fmtJPY(kas.net_jpy)}</div>
-    </div>
-  `;
-
-  $('#unpaid').innerHTML = `
-    <table class="min-w-full border">
-      <tr class="bg-slate-100">
-        <th class="p-2 text-left">Siswa</th>
-        <th class="p-2">Bulan</th>
-        <th class="p-2">Due</th>
-        <th class="p-2">Paid</th>
-        <th class="p-2">Status</th>
-        <th class="p-2">Aksi</th>
-      </tr>
-      ${unpaid.map(u=>`
-        <tr class="border-t">
-          <td class="p-2">${u.student_id}</td>
-          <td class="p-2">${u.month}</td>
-          <td class="p-2 text-right">${fmtJPY(u.total_due_jpy)}</td>
-          <td class="p-2 text-right">${fmtJPY(u.total_paid_jpy)}</td>
-          <td class="p-2">${u.status}</td>
-          <td class="p-2">
-            <button class="px-2 py-1 rounded bg-slate-900 text-white" onclick="genInvoice('${u.id}')">Cetak Invoice</button>
-          </td>
-        </tr>`).join('')}
-    </table>
-  `;
-
-  $('#tblInvoice').innerHTML = `
-    <table class="min-w-full border">
-      <tr class="bg-slate-100">
-        <th class="p-2 text-left">ID</th><th class="p-2">Siswa</th><th class="p-2">Bulan</th>
-        <th class="p-2">Due</th><th class="p-2">Paid</th><th class="p-2">Status</th><th class="p-2">PDF</th>
-      </tr>
-      ${invoices.map(i=>`
-        <tr class="border-t">
-          <td class="p-2">${i.id}</td>
-          <td class="p-2">${i.student_id}</td>
-          <td class="p-2">${i.month}</td>
-          <td class="p-2 text-right">${fmtJPY(i.total_due_jpy)}</td>
-          <td class="p-2 text-right">${fmtJPY(i.total_paid_jpy)}</td>
-          <td class="p-2">${i.status}</td>
-          <td class="p-2"><button class="px-2 py-1 rounded bg-slate-900 text-white" onclick="genInvoice('${i.id}')">Cetak</button></td>
-        </tr>
-      `).join('')}
-    </table>
-  `;
-
-  $('#tblMuk').innerHTML = `
-    <table class="min-w-full border">
-      <tr class="bg-slate-100"><th class="p-2 text-left">Guru</th><th class="p-2">Bulan</th><th class="p-2">Mukafaah (70%)</th></tr>
-      ${muk.map(m=>`<tr class="border-t"><td class="p-2">${m.full_name||m.teacher_id}</td><td class="p-2">${m.month}</td><td class="p-2 text-right">${fmtJPY(m.mukafaah_jpy)}</td></tr>`).join('')}
-    </table>
-  `;
-
-  $('#boxKas').innerHTML = `
-    <div class="grid md:grid-cols-3 gap-3">
-      <div class="p-3 rounded bg-white shadow"><div class="text-slate-500 text-sm">Pemasukan</div><div class="text-xl font-semibold">${fmtJPY(kas.total_income_jpy)}</div></div>
-      <div class="p-3 rounded bg-white shadow"><div class="text-slate-500 text-sm">Pengeluaran</div><div class="text-xl font-semibold">${fmtJPY(kas.total_expense_jpy)}</div></div>
-      <div class="p-3 rounded bg-white shadow"><div class="text-slate-500 text-sm">Net</div><div class="text-xl font-semibold">${fmtJPY(kas.net_jpy)}</div></div>
-    </div>
-  `;
-}
-
-async function loadStudents(){
-  const S = await jsonp('listStudents');
-  $('#tblSiswa').innerHTML = `
-    <table class="min-w-full border">
-      <tr class="bg-slate-100"><th class="p-2 text-left">ID</th><th class="p-2">Nama</th><th class="p-2">Family Key</th><th class="p-2">Ortu</th><th class="p-2">Status</th></tr>
-      ${S.map(s=>`<tr class="border-t"><td class="p-2">${s.id}</td><td class="p-2">${s.full_name}</td><td class="p-2">${s.family_key}</td><td class="p-2">${s.parent_name}</td><td class="p-2">${s.status}</td></tr>`).join('')}
-    </table>
-  `;
-  const opt = S.map(s=>`<option value="${s.id}">${s.full_name} (${s.id})</option>`).join('');
-  const payStudent = byId('payStudent'); if (payStudent) payStudent.innerHTML = opt;
-}
-
-async function loadClasses(){
-  const C = await jsonp('listClasses');
-  const payClass = byId('payClass');
-  if (payClass) payClass.innerHTML = C.map(c=>`<option value="${c.id}">${c.class_name} — ¥${c.monthly_fee_jpy}</option>`).join('');
-}
-
-function wirePayments(){
-  const f = byId('payForm'); if (!f) return;
-  f.addEventListener('submit', async (ev)=>{
-    ev.preventDefault();
-    const payload = {
-      student_id: byId('payStudent').value,
-      class_id: byId('payClass').value,
-      month: byId('payMonth').value,
-      amount_jpy: byId('payAmount').value,
-      method: 'Cash'
-    };
-    const res = await jsonp('addPayment', payload);
-    if (res?.payment_id){
-      const gen = await jsonp('genReceiptPdf', { payment_id: res.payment_id });
-      byId('payResult').innerHTML = gen?.file_id ? `✅ Tersimpan. Kwitansi dibuat (Drive fileId: ${gen.file_id}).` : 'Tersimpan, gagal buat kwitansi.';
-      await loadDashboard();
-    } else {
-      byId('payResult').innerText = 'Gagal menyimpan pembayaran.';
-    }
-  });
-}
-
-async function loadBilling(){
-  const month = byId('billMonth')?.value || new Date().toISOString().slice(0,7);
-  const unpaid = await jsonp('unpaidStudents', { month });
-  const tbl = byId('tblBill'); if (!tbl) return;
-  tbl.innerHTML = `
-    <table class="min-w-full border">
-      <tr class="bg-slate-100">
-        <th class="p-2 text-left">Invoice ID</th>
-        <th class="p-2">Siswa</th>
-        <th class="p-2">Bulan</th>
-        <th class="p-2">Due</th>
-        <th class="p-2">Paid</th>
-        <th class="p-2">Status</th>
-        <th class="p-2">Aksi</th>
-      </tr>
-      ${unpaid.map(u=>`
-        <tr class="border-t">
-          <td class="p-2">${u.id}</td>
-          <td class="p-2">${u.student_id}</td>
-          <td class="p-2">${u.month}</td>
-          <td class="p-2 text-right">${fmtJPY(u.total_due_jpy)}</td>
-          <td class="p-2 text-right">${fmtJPY(u.total_paid_jpy)}</td>
-          <td class="p-2">${u.status}</td>
-          <td class="p-2"><button class="px-2 py-1 rounded bg-slate-900 text-white" onclick="genInvoice('${u.id}')">Cetak</button></td>
-        </tr>
-      `).join('')}
-    </table>
-  `;
-}
-
-async function genInvoice(invoice_id){
-  const gen = await jsonp('genInvoicePdf', { invoice_id });
-  alert(gen?.file_id ? `Invoice PDF dibuat. fileId: ${gen.file_id}` : 'Gagal membuat PDF.');
-}
-
-// ======= BOOTSTRAP =======
-document.addEventListener('DOMContentLoaded', async () => {
-  const sections = Array.from(document.querySelectorAll('section'));
-  const tabs = Array.from(document.querySelectorAll('.tab'));
-  function showTab(name){
-    sections.forEach(s => s.classList.add('hidden'));
-    document.getElementById(name)?.classList.remove('hidden');
-    tabs.forEach(t => t.classList.remove('active'));
-    tabs.find(t => t.dataset.tab===name)?.classList.add('active');
-  }
-  tabs.forEach(btn => btn.addEventListener('click', () => showTab(btn.dataset.tab)));
-  showTab(tabs[0]?.dataset.tab || 'dashboard');
-
-  const monthNow = new Date().toISOString().slice(0,7);
-  if (byId('bulan')) byId('bulan').value = monthNow;
-  if (byId('billMonth')) byId('billMonth').value = monthNow;
-
-  $('#btnRefresh')?.addEventListener('click', loadDashboard);
-  byId('btnLoadBilling')?.addEventListener('click', loadBilling);
-  byId('btnBulk')?.addEventListener('click', async ()=>{
-    const month = byId('billMonth')?.value || monthNow;
-    const res = await jsonp('genInvoicePdfBulk', { month });
-    alert(res?.ok ? `Berhasil membuat ${res.generated} PDF.` : 'Gagal cetak massal.');
-    await loadBilling();
-  });
-
-  try{
-    await loadDashboard();
-    await loadStudents();
-    await loadClasses();
-    wirePayments();
-    await loadBilling();
-  }catch(err){ console.error('Init error:', err); }
+    // Muat data saat pertama kali dibuka
+    loadData();
 });
+
+// Fungsi untuk mengekstrak Nama dan Nomor HP 
+function parseContact(line) {
+    line = line.trim();
+    if (!line) return null;
+
+    // Cari pola angka untuk nomor HP
+    const phoneRegex = /(?:\+62|62|0)[0-9\- ]{7,15}/g;
+    const phoneMatch = line.match(phoneRegex);
+    let phone = phoneMatch ? phoneMatch[0].replace(/[^0-9\+]/g, '') : '';
+    
+    // Hapus nomor dari baris untuk mendapatkan nama saja
+    let name = line.replace(phoneRegex, '').replace(/[-()]/g, '').trim();
+    
+    // Jika tidak ada huruf sama sekali, gunakan teks asli
+    if (!name) name = line;
+
+    // Bersihkan nama dari spasi berlebih agar tag menempel
+    name = name.replace(/\s+/g, ''); 
+
+    return { name, phone, original: line };
+}
+
+function saveData() {
+    const raw = document.getElementById('rawInput').value;
+    const lines = raw.split('\n');
+    const contacts = lines.map(parseContact).filter(c => c !== null);
+    
+    localStorage.setItem('wa_db_wahyu', JSON.stringify(contacts));
+    render(contacts);
+    alert("✅ Data berhasil disimpan & dioptimalkan!");
+}
+
+function loadData() {
+    const saved = localStorage.getItem('wa_db_wahyu');
+    if(saved) { 
+        const contacts = JSON.parse(saved);
+        render(contacts); 
+        document.getElementById('rawInput').value = contacts.map(c => c.original).join('\n'); 
+    }
+}
+
+function clearData() {
+    if(confirm("Yakin ingin menghapus semua data?")) {
+        localStorage.removeItem('wa_db_wahyu');
+        document.getElementById('rawInput').value = '';
+        render([]);
+    }
+}
+
+function render(data) {
+    const container = document.getElementById('nameList');
+    container.innerHTML = data.map((c) => `
+        <div class="list-item" onclick="toggleItem(this)">
+            <div class="list-item-left">
+                <input type="checkbox" class="chk" data-name="${c.name}" data-phone="${c.phone}">
+                <span>${c.name || 'Tanpa Nama'}</span>
+            </div>
+            ${c.phone ? `<span class="contact-phone">${c.phone}</span>` : ''}
+        </div>
+    `).join('');
+    updateCount();
+}
+
+function toggleItem(div) {
+    const cb = div.querySelector('input');
+    if(event.target.type !== 'checkbox') cb.checked = !cb.checked;
+    updateCount();
+}
+
+function updateCount() {
+    const selected = document.querySelectorAll('.chk:checked');
+    const batchSection = document.getElementById('batchSection');
+    const grid = document.getElementById('batchButtons');
+    
+    if(selected.length > 0) {
+        batchSection.style.display = 'block';
+        grid.innerHTML = '';
+        const batchSize = 20;
+        const selectedArr = Array.from(selected);
+
+        for (let i = 0; i < selectedArr.length; i += batchSize) {
+            const batch = selectedArr.slice(i, i + batchSize);
+            const btn = document.createElement('button');
+            btn.className = 'main-btn btn-batch-copy';
+            btn.innerText = `Salin Orang ${i+1} - ${Math.min(i + batchSize, selectedArr.length)}`;
+            btn.onclick = () => copyBatch(batch);
+            grid.appendChild(btn);
+        }
+    } else {
+        batchSection.style.display = 'none';
+    }
+}
+
+function formatText(checkboxes) {
+    const useAt = document.getElementById('atTag').checked;
+    const useNum = document.getElementById('numTag').checked;
+    const tagByPhone = document.getElementById('tagByPhone').checked;
+    const pesan = document.getElementById('msgInput').value;
+
+    const formatted = checkboxes.map((cb, i) => {
+        const name = cb.getAttribute('data-name');
+        let phone = cb.getAttribute('data-phone');
+        
+        if (phone && phone.startsWith('0')) {
+            phone = '62' + phone.substring(1);
+        }
+
+        let identifier = (tagByPhone && phone) ? phone : name;
+        let res = useAt ? "@" + identifier : identifier;
+        
+        return useNum ? (i+1) + ". " + res : res;
+    });
+
+    const namePart = useNum ? formatted.join('\n') : formatted.join(' ');
+    return pesan ? pesan + "\n\n" + namePart : namePart;
+}
+
+function copyBatch(batchCbs) {
+    const txt = formatText(batchCbs);
+    navigator.clipboard.writeText(txt).then(() => {
+        alert("✅ Teks Disalin!\n\nBuka WA, Tempel (Paste). Lalu hapus 1 huruf terakhir dari nama orang tersebut, dan ketik ulang hurufnya agar tag biru muncul.");
+    });
+}
+
+function sendWA() {
+    const selected = Array.from(document.querySelectorAll('.chk:checked'));
+    if(selected.length === 0) return alert("Pilih minimal satu orang!");
+    
+    const txt = formatText(selected);
+    window.open("https://wa.me/?text=" + encodeURIComponent(txt), "_blank");
+}
+
+function filterList() {
+    const q = document.getElementById('search').value.toLowerCase();
+    document.querySelectorAll('.list-item').forEach(item => {
+        const textContent = item.innerText.toLowerCase();
+        item.style.display = textContent.includes(q) ? 'flex' : 'none';
+    });
+}
+
+function toggleAll() {
+    const cbs = document.querySelectorAll('.chk');
+    if(cbs.length === 0) return;
+    
+    let anyUnchecked = Array.from(cbs).some(c => !c.checked && c.closest('.list-item').style.display !== 'none');
+    
+    cbs.forEach(c => { 
+        if(c.closest('.list-item').style.display !== 'none') {
+            c.checked = anyUnchecked; 
+        }
+    });
+    updateCount();
+}
+
+function toggleHelp(show) { 
+    document.getElementById('helpModal').style.display = show ? 'block' : 'none'; 
+}
