@@ -1,316 +1,193 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WA Tagger Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #075e54;
-            --secondary: #128c7e;
-            --accent: #25D366;
-            --bg: #f0f2f5;
-        }
-
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: var(--bg);
-            padding: 15px;
-            margin: 0;
-            color: #333;
-        }
-
-        .container {
-            max-width: 550px;
-            margin: 0 auto;
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            position: relative;
-        }
-
-        .btn-help {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: #ddd;
-            border: none;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 18px;
-            color: #555;
-        }
-
-        h2 {
-            text-align: center;
-            color: var(--primary);
-            margin: 0 0 5px 0;
-        }
-
-        .author {
-            text-align: center;
-            font-size: 12px;
-            color: #888;
-            margin-bottom: 20px;
-            font-style: italic;
-        }
-
-        #helpModal {
-            display: none;
-            position: fixed;
-            z-index: 100;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-        }
-
-        .modal-content {
-            background: white;
-            margin: 15% auto;
-            padding: 20px;
-            border-radius: 12px;
-            width: 85%;
-            max-width: 400px;
-        }
-
-        .btn-close {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 10px;
-            width: 100%;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        .box {
-            background: #e8f5e9;
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #c8e6c9;
-            margin-bottom: 15px;
-        }
-
-        label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-family: inherit;
-            font-size: 14px;
-            resize: none;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .btn-save {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px;
-            width: 100%;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .btn-clear {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 12px;
-            width: 100%;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .settings {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 15px;
-            padding: 10px;
-            background: #f9f9f9;
-            border-radius: 8px;
-            font-size: 13px;
-        }
-
-        .toggle {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .list-container {
-            max-height: 250px;
-            overflow-y: auto;
-            border: 1px solid #eee;
-            border-radius: 10px;
-            background: #fafafa;
-            margin-bottom: 15px;
-        }
-
-        .list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 15px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .list-item:hover {
-            background: #f0f0f0;
-        }
-
-        .list-item-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .list-item input {
-            transform: scale(1.3);
-            cursor: pointer;
-        }
-
-        .contact-phone {
-            font-size: 11px;
-            color: #888;
-        }
-
-        .batch-area {
-            margin-top: 10px;
-            border-top: 2px dashed #ddd;
-            padding-top: 15px;
-        }
-
-        .batch-label {
-            font-size: 13px;
-            font-weight: bold;
-            color: #555;
-            margin-bottom: 10px;
-            display: block;
-            text-align: center;
-        }
-
-        .batch-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .main-btn {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 10px;
-            font-weight: bold;
-            font-size: 14px;
-            cursor: pointer;
-            color: white;
-            margin-bottom: 10px;
-            transition: opacity 0.2s;
-        }
-
-        .main-btn:hover {
-            opacity: 0.9;
-        }
-
-        .btn-wa {
-            background-color: var(--accent);
-        }
-
-        .btn-batch-copy {
-            background-color: #3498db;
-            font-size: 12px;
-            padding: 10px;
-        }
+        :root { --primary: #075e54; --secondary: #128c7e; --accent: #25D366; --bg: #f0f2f5; }
+        body { font-family: 'Roboto', sans-serif; background-color: var(--bg); padding: 15px; margin: 0; color: #333; }
+        .container { max-width: 500px; margin: 0 auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; }
+        .btn-help { position: absolute; top: 20px; right: 20px; background: #ddd; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-weight: bold; font-size: 18px; color: #555; }
+        h2 { text-align: center; color: var(--primary); margin: 0 0 5px 0; }
+        .author { text-align: center; font-size: 12px; color: #888; margin-bottom: 20px; font-style: italic; }
+        #helpModal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+        .modal-content { background: white; margin: 15% auto; padding: 20px; border-radius: 12px; width: 85%; max-width: 400px; }
+        .btn-close { background: var(--primary); color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; cursor: pointer; margin-top: 10px; }
+        .box { background: #e8f5e9; padding: 15px; border-radius: 10px; border: 1px solid #c8e6c9; margin-bottom: 15px; }
+        label { font-weight: bold; display: block; margin-bottom: 8px; font-size: 14px; }
+        textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px; resize: none; }
+        .btn-save { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .settings { display: flex; gap: 15px; margin-bottom: 15px; padding: 10px; background: #f9f9f9; border-radius: 8px; font-size: 13px; }
+        .toggle { display: flex; align-items: center; cursor: pointer; }
+        .list-container { max-height: 250px; overflow-y: auto; border: 1px solid #eee; border-radius: 10px; background: #fafafa; margin-bottom: 15px; }
+        .list-item { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; }
+        .list-item input { margin-right: 15px; transform: scale(1.3); cursor: pointer; }
+        .batch-area { margin-top: 10px; border-top: 2px dashed #ddd; padding-top: 15px; }
+        .batch-label { font-size: 13px; font-weight: bold; color: #555; margin-bottom: 10px; display: block; text-align: center;}
+        .batch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .main-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; color: white; margin-bottom: 10px; }
+        .btn-wa { background-color: var(--accent); }
+        .btn-batch-copy { background-color: #3498db; font-size: 11px; padding: 10px; }
     </style>
 </head>
-
 <body>
 
-    <div class="container">
-        <button class="btn-help" id="btnHelp">?</button>
-        <h2>WA Tagger Pro</h2>
-        <div class="author">Design by Wahyu</div>
+<div class="container">
+    <button class="btn-help" onclick="toggleHelp(true)">?</button>
+    <h2>WA Tagger Pro</h2>
+    <div class="author">Design by Wahyu</div>
 
-        <div id="helpModal">
-            <div class="modal-content">
-                <h3>Trik Tag Biru Super Cepat:</h3>
-                <ol>
-                    <li>Salin teks menggunakan tombol biru <b>"Salin Nama..."</b>.</li>
-                    <li>Tempel (Paste) di kolom chat grup WhatsApp.</li>
-                    <li><b>Trik Rahasia:</b> Taruh kursor di huruf terakhir nama orang, tekan <b>Backspace</b> (Hapus 1
-                        huruf), lalu ketik kembali huruf tersebut.</li>
-                    <li>Pilihan tag akan otomatis muncul, klik namanya!</li>
-                </ol>
-                <button class="btn-close" id="btnCloseHelp">Tutup</button>
-            </div>
+    <div id="helpModal">
+        <div class="modal-content">
+            <h3>Trik Tag Biru:</h3>
+            <ol>
+                <li>Pilih nama-nama anggota.</li>
+                <li>Gunakan tombol biru <b>"Salin Nama..."</b> per 20 orang.</li>
+                <li>Buka WhatsApp, <b>Tempel (Paste)</b> di grup.</li>
+                <li>Hapus 1 huruf terakhir di nama tersebut, lalu ketik ulang hurufnya agar pilihan kontak muncul.</li>
+            </ol>
+            <button class="btn-close" onclick="toggleHelp(false)">Tutup</button>
         </div>
-
-        <div class="box">
-            <label>1. Input Data (Bisa Format: Nama 0812xxx):</label>
-            <textarea id="rawInput" rows="4" placeholder="Contoh:&#10;Andi 0812345678&#10;Budi 0898765432"></textarea>
-            <div class="btn-group">
-                <button class="btn-save" id="btnSave">💾 SIMPAN DATA</button>
-                <button class="btn-clear" id="btnClear">🗑️ RESET</button>
-            </div>
-        </div>
-
-        <label>2. Pesan Pengantar (Opsional):</label>
-        <textarea id="msgInput" rows="2" placeholder="Contoh: Tolong kumpul di ruang meeting..."></textarea>
-
-        <div class="settings">
-            <label class="toggle"><input type="checkbox" id="atTag" checked> Gunakan '@'</label>
-            <label class="toggle"><input type="checkbox" id="numTag"> Pakai No. Urut (1, 2, 3)</label>
-            <label class="toggle"><input type="checkbox" id="tagByPhone"> Tag via Nomor WA (Lebih Ampuh)</label>
-        </div>
-
-        <label>3. Pilih Anggota:</label>
-        <div style="display:flex; gap:10px; margin-bottom:10px;">
-            <input type="text" id="search" placeholder="Cari nama/nomor..."
-                style="flex:1; padding:10px; border-radius:8px; border:1px solid #ddd; outline:none;">
-            <button id="btnToggleAll"
-                style="padding:10px 15px; border-radius:8px; border:none; cursor:pointer; background:#eee; font-weight:bold;">Pilih
-                Semua</button>
-        </div>
-
-        <div class="list-container" id="nameList"></div>
-
-        <div class="batch-area" id="batchSection" style="display:none;">
-            <span class="batch-label">📋 Salin Per 20 Orang (Hindari Limit WA):</span>
-            <div class="batch-grid" id="batchButtons"></div>
-        </div>
-
-        <button class="main-btn btn-wa" id="btnSendWA" style="margin-top:20px;">🚀 KIRIM KE WA (LINK LANGSUNG)</button>
     </div>
 
-    <script src="app.js"></script>
-</body>
+    <div class="box">
+        <label>1. Input Data Nama & Nomor:</label>
+        <textarea id="rawInput" rows="4" placeholder="Contoh:&#10;Andi 0812xxx&#10;Budi 0813xxx"></textarea>
+        <button class="btn-save" onclick="saveData()">💾 SIMPAN DAFTAR</button>
+    </div>
 
+    <label>2. Pesan (Opsional):</label>
+    <textarea id="msgInput" rows="2" placeholder="Tulis pesan pengantar..."></textarea>
+
+    <div class="settings">
+        <label class="toggle"><input type="checkbox" id="atTag" checked> Pakai '@'</label>
+        <label class="toggle"><input type="checkbox" id="numTag" checked> No. Urut (1, 2, 3)</label>
+    </div>
+
+    <label>3. Pilih Anggota:</label>
+    <div style="display:flex; gap:10px; margin-bottom:10px;">
+        <input type="text" id="search" placeholder="Cari nama..." onkeyup="filter()" style="flex:1; padding:10px; border-radius:8px; border:1px solid #ddd;">
+        <button onclick="toggleAll()" style="padding:10px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">Pilih Semua</button>
+    </div>
+    
+    <div class="list-container" id="nameList"></div>
+
+    <div class="batch-area" id="batchSection" style="display:none;">
+        <span class="batch-label">📋 Salin Per 20 Nama (Anti Limit WA):</span>
+        <div class="batch-grid" id="batchButtons"></div>
+    </div>
+
+    <button class="main-btn btn-wa" onclick="sendWA()" style="margin-top:20px;">🚀 KIRIM KE WA (LINK LANGSUNG)</button>
+</div>
+
+<script>
+    function toggleHelp(show) { document.getElementById('helpModal').style.display = show ? 'block' : 'none'; }
+    
+    // INI ADALAH KODE ASLI ANDA: Menghapus semua angka dan simbol agar murni hanya tersisa NAMA.
+    function cleanName(txt) { 
+        return txt.replace(/[0-9\+\-\(\)]/g, '').trim(); 
+    }
+    
+    function saveData() {
+        const raw = document.getElementById('rawInput').value;
+        const names = raw.split('\n').map(cleanName).filter(n => n !== "");
+        localStorage.setItem('wa_db_wahyu', JSON.stringify(names));
+        render(names);
+        alert("✅ Data disimpan!");
+    }
+
+    function render(data) {
+        const container = document.getElementById('nameList');
+        container.innerHTML = data.map(n => `
+            <div class="list-item" onclick="toggleItem(this)">
+                <input type="checkbox" class="chk" value="${n}">
+                <span>${n}</span>
+            </div>
+        `).join('');
+        updateCount();
+    }
+
+    function toggleItem(div) {
+        const cb = div.querySelector('input');
+        if(event.target.type !== 'checkbox') cb.checked = !cb.checked;
+        updateCount();
+    }
+
+    function updateCount() {
+        const selected = Array.from(document.querySelectorAll('.chk:checked')).map(c => c.value);
+        const batchSection = document.getElementById('batchSection');
+        const grid = document.getElementById('batchButtons');
+        
+        if(selected.length > 0) {
+            batchSection.style.display = 'block';
+            grid.innerHTML = '';
+            const batchSize = 20;
+            for (let i = 0; i < selected.length; i += batchSize) {
+                const batch = selected.slice(i, i + batchSize);
+                const btn = document.createElement('button');
+                btn.className = 'main-btn btn-batch-copy';
+                btn.innerText = `Salin Orang ${i+1}-${Math.min(i + batchSize, selected.length)}`;
+                btn.onclick = () => copyBatch(batch);
+                grid.appendChild(btn);
+            }
+        } else {
+            batchSection.style.display = 'none';
+        }
+    }
+
+    function formatText(names) {
+        const useAt = document.getElementById('atTag').checked;
+        const useNum = document.getElementById('numTag').checked;
+        const pesan = document.getElementById('msgInput').value;
+        const formatted = names.map((n, i) => {
+            let res = useAt ? "@" + n : n;
+            return useNum ? (i+1) + ". " + res : res;
+        });
+        const namePart = useNum ? formatted.join('\n') : formatted.join(' ');
+        return pesan ? pesan + "\n\n" + namePart : namePart;
+    }
+
+    function copyBatch(names) {
+        const txt = formatText(names);
+        navigator.clipboard.writeText(txt).then(() => {
+            alert("✅ Teks Berhasil Disalin!\n\nTempel di WhatsApp, lalu hapus 1 huruf paling akhir dan ketik ulang hurufnya.");
+        });
+    }
+
+    function sendWA() {
+        const selected = Array.from(document.querySelectorAll('.chk:checked')).map(c => c.value);
+        if(selected.length === 0) return alert("Pilih nama!");
+        const txt = formatText(selected);
+        window.open("https://wa.me/?text=" + encodeURIComponent(txt), "_blank");
+    }
+
+    function filter() {
+        const q = document.getElementById('search').value.toLowerCase();
+        document.querySelectorAll('.list-item').forEach(item => {
+            item.style.display = item.innerText.toLowerCase().includes(q) ? 'flex' : 'none';
+        });
+    }
+
+    function toggleAll() {
+        const cbs = document.querySelectorAll('.chk');
+        if(cbs.length === 0) return;
+        let anyUnchecked = Array.from(cbs).some(c => !c.checked && c.closest('.list-item').style.display !== 'none');
+        cbs.forEach(c => { 
+            if(c.closest('.list-item').style.display !== 'none') c.checked = anyUnchecked; 
+        });
+        updateCount();
+    }
+
+    window.onload = () => {
+        const saved = localStorage.getItem('wa_db_wahyu');
+        if(saved) { 
+            render(JSON.parse(saved)); 
+            // Opsional: jika ingin kolom input tetap terisi data lama
+            // document.getElementById('rawInput').value = JSON.parse(saved).join('\n'); 
+        }
+    };
+</script>
+</body>
 </html>
