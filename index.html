@@ -1,108 +1,316 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
+
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>RBMJ Jepang — Manajemen</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WA Tagger Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #075e54;
+            --secondary: #128c7e;
+            --accent: #25D366;
+            --bg: #f0f2f5;
+        }
 
-  <!-- Tailwind CDN (untuk prototipe) -->
-  <script src="https://cdn.tailwindcss.com"></script>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg);
+            padding: 15px;
+            margin: 0;
+            color: #333;
+        }
 
-  <style>
-    .tab.active{ background:#111827; color:#fff; box-shadow:0 1px 2px rgba(0,0,0,.08); }
-    .card{ background:#fff; border-radius:16px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
-  </style>
+        .container {
+            max-width: 550px;
+            margin: 0 auto;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
 
-  <script src="./app.js" defer></script>
+        .btn-help {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #ddd;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 18px;
+            color: #555;
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--primary);
+            margin: 0 0 5px 0;
+        }
+
+        .author {
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        #helpModal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 12px;
+            width: 85%;
+            max-width: 400px;
+        }
+
+        .btn-close {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .box {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #c8e6c9;
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 14px;
+            resize: none;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-save {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-clear {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .settings {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .toggle {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .list-container {
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            background: #fafafa;
+            margin-bottom: 15px;
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .list-item:hover {
+            background: #f0f0f0;
+        }
+
+        .list-item-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .list-item input {
+            transform: scale(1.3);
+            cursor: pointer;
+        }
+
+        .contact-phone {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .batch-area {
+            margin-top: 10px;
+            border-top: 2px dashed #ddd;
+            padding-top: 15px;
+        }
+
+        .batch-label {
+            font-size: 13px;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 10px;
+            display: block;
+            text-align: center;
+        }
+
+        .batch-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .main-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            color: white;
+            margin-bottom: 10px;
+            transition: opacity 0.2s;
+        }
+
+        .main-btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-wa {
+            background-color: var(--accent);
+        }
+
+        .btn-batch-copy {
+            background-color: #3498db;
+            font-size: 12px;
+            padding: 10px;
+        }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-900">
-  <div class="max-w-7xl mx-auto p-6">
-    <header class="flex items-center justify-between mb-4">
-      <h1 class="text-2xl font-bold">RBMJ Jepang</h1>
-      <nav class="flex gap-2 text-sm">
-        <button class="tab px-3 py-1 rounded-xl" data-tab="dashboard">Dashboard</button>
-        <button class="tab px-3 py-1 rounded-xl" data-tab="siswa">Siswa</button>
-        <button class="tab px-3 py-1 rounded-xl" data-tab="pembayaran">Pembayaran</button>
-        <button class="tab px-3 py-1 rounded-xl" data-tab="invoice">Invoice</button>
-        <button class="tab px-3 py-1 rounded-xl" data-tab="mukafaah">Mukafaah</button>
-        <button class="tab px-3 py-1 rounded-xl" data-tab="kas">Buku Kas</button>
-        <button class="tab px-3 py-1 rounded-xl" data-tab="penagihan">Penagihan</button>
-      </nav>
-    </header>
 
-    <!-- DASHBOARD -->
-    <section id="dashboard" class="card p-4">
-      <div class="flex items-center gap-2 mb-3">
-        <label class="text-sm">Bulan</label>
-        <input id="bulan" type="month" class="border rounded p-2" />
-        <button id="btnRefresh" class="px-3 py-2 rounded bg-slate-900 text-white">Refresh</button>
-      </div>
-      <div id="stats" class="grid sm:grid-cols-2 md:grid-cols-3 gap-3 mb-4"></div>
-      <h3 class="font-semibold mb-2">Daftar Siswa Belum Lunas</h3>
-      <div id="unpaid" class="overflow-auto text-sm"></div>
-    </section>
+<body>
 
-    <!-- SISWA -->
-    <section id="siswa" class="hidden card p-4">
-      <h3 class="font-semibold mb-3">Data Siswa</h3>
-      <div id="tblSiswa" class="text-sm overflow-auto"></div>
-    </section>
+    <div class="container">
+        <button class="btn-help" id="btnHelp">?</button>
+        <h2>WA Tagger Pro</h2>
+        <div class="author">Design by Wahyu</div>
 
-    <!-- PEMBAYARAN -->
-    <section id="pembayaran" class="hidden card p-4">
-      <h3 class="font-semibold mb-3">Input Pembayaran</h3>
-      <form id="payForm" class="grid sm:grid-cols-2 gap-3 max-w-xl">
-        <label class="text-sm">
-          <div class="mb-1">Siswa</div>
-          <select id="payStudent" class="border rounded p-2 w-full"></select>
-        </label>
-        <label class="text-sm">
-          <div class="mb-1">Kelas</div>
-          <select id="payClass" class="border rounded p-2 w-full"></select>
-        </label>
-        <label class="text-sm">
-          <div class="mb-1">Bulan</div>
-          <input id="payMonth" type="month" class="border rounded p-2 w-full" />
-        </label>
-        <label class="text-sm">
-          <div class="mb-1">Jumlah (JPY)</div>
-          <input id="payAmount" type="number" class="border rounded p-2 w-full" />
-        </label>
-        <div class="col-span-full flex gap-2">
-          <button class="px-3 py-2 rounded bg-emerald-600 text-white" type="submit">Simpan & Buat Kwitansi</button>
-          <div id="payResult" class="text-sm text-slate-600 flex items-center"></div>
+        <div id="helpModal">
+            <div class="modal-content">
+                <h3>Trik Tag Biru Super Cepat:</h3>
+                <ol>
+                    <li>Salin teks menggunakan tombol biru <b>"Salin Nama..."</b>.</li>
+                    <li>Tempel (Paste) di kolom chat grup WhatsApp.</li>
+                    <li><b>Trik Rahasia:</b> Taruh kursor di huruf terakhir nama orang, tekan <b>Backspace</b> (Hapus 1
+                        huruf), lalu ketik kembali huruf tersebut.</li>
+                    <li>Pilihan tag akan otomatis muncul, klik namanya!</li>
+                </ol>
+                <button class="btn-close" id="btnCloseHelp">Tutup</button>
+            </div>
         </div>
-      </form>
-    </section>
 
-    <!-- INVOICE -->
-    <section id="invoice" class="hidden card p-4">
-      <h3 class="font-semibold mb-3">Invoice</h3>
-      <div id="tblInvoice" class="text-sm overflow-auto"></div>
-    </section>
+        <div class="box">
+            <label>1. Input Data (Bisa Format: Nama 0812xxx):</label>
+            <textarea id="rawInput" rows="4" placeholder="Contoh:&#10;Andi 0812345678&#10;Budi 0898765432"></textarea>
+            <div class="btn-group">
+                <button class="btn-save" id="btnSave">💾 SIMPAN DATA</button>
+                <button class="btn-clear" id="btnClear">🗑️ RESET</button>
+            </div>
+        </div>
 
-    <!-- MUKAFAAH -->
-    <section id="mukafaah" class="hidden card p-4">
-      <h3 class="font-semibold mb-3">Mukafaah Guru</h3>
-      <div id="tblMuk" class="text-sm overflow-auto"></div>
-    </section>
+        <label>2. Pesan Pengantar (Opsional):</label>
+        <textarea id="msgInput" rows="2" placeholder="Contoh: Tolong kumpul di ruang meeting..."></textarea>
 
-    <!-- KAS -->
-    <section id="kas" class="hidden card p-4">
-      <h3 class="font-semibold mb-3">Ringkasan Kas</h3>
-      <div id="boxKas"></div>
-    </section>
+        <div class="settings">
+            <label class="toggle"><input type="checkbox" id="atTag" checked> Gunakan '@'</label>
+            <label class="toggle"><input type="checkbox" id="numTag"> Pakai No. Urut (1, 2, 3)</label>
+            <label class="toggle"><input type="checkbox" id="tagByPhone"> Tag via Nomor WA (Lebih Ampuh)</label>
+        </div>
 
-    <!-- PENAGIHAN -->
-    <section id="penagihan" class="hidden card p-4">
-      <div class="flex items-center gap-2 mb-3">
-        <h3 class="font-semibold">Penagihan (Belum Bayar)</h3>
-        <input id="billMonth" type="month" class="border rounded p-2" />
-        <button id="btnLoadBilling" class="px-3 py-2 rounded bg-slate-900 text-white">Muat</button>
-        <button id="btnBulk" class="px-3 py-2 rounded bg-emerald-600 text-white">Cetak Massal</button>
-      </div>
-      <div id="tblBill" class="text-sm overflow-auto"></div>
-    </section>
-  </div>
+        <label>3. Pilih Anggota:</label>
+        <div style="display:flex; gap:10px; margin-bottom:10px;">
+            <input type="text" id="search" placeholder="Cari nama/nomor..."
+                style="flex:1; padding:10px; border-radius:8px; border:1px solid #ddd; outline:none;">
+            <button id="btnToggleAll"
+                style="padding:10px 15px; border-radius:8px; border:none; cursor:pointer; background:#eee; font-weight:bold;">Pilih
+                Semua</button>
+        </div>
+
+        <div class="list-container" id="nameList"></div>
+
+        <div class="batch-area" id="batchSection" style="display:none;">
+            <span class="batch-label">📋 Salin Per 20 Orang (Hindari Limit WA):</span>
+            <div class="batch-grid" id="batchButtons"></div>
+        </div>
+
+        <button class="main-btn btn-wa" id="btnSendWA" style="margin-top:20px;">🚀 KIRIM KE WA (LINK LANGSUNG)</button>
+    </div>
+
+    <script src="app.js"></script>
 </body>
+
 </html>
